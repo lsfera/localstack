@@ -1,16 +1,19 @@
 provider "aws" {
     region = "eu-west-1"
-    access_key = "anaccesskey"
-    secret_key = "asecretkey"
+    access_key = "test"
+    secret_key = "test"
     skip_credentials_validation = true
     skip_requesting_account_id = true 
     skip_metadata_api_check = true
-#   s3_use_path_style = true
+    s3_use_path_style = true
     
     endpoints {
-        s3  = "s3.localhost.localstack.cloud"
+        s3  = "http://localstack:4566"
         sns = "http://localstack:4566"
         sqs = "http://localstack:4566"
+        sts = "http://localstack:4566"
+        iam = "http://localstack:4566"
+        lambda = "http://localstack:4566"
   }
 }
 

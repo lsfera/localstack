@@ -3,7 +3,7 @@ version: "3.8"
 services:
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
-    image: localstack/localstack
+    image: localstack/localstack:latest
     ports:
       - "127.0.0.1:4566:4566"            # LocalStack Gateway
       - "127.0.0.1:4510-4559:4510-4559"  # external services port range
@@ -32,15 +32,10 @@ services:
       - AWS_DEFAULT_REGION=eu-west-1
       - ENV=dev
       - LOCALSTACK_HOSTNAME=localstack
- #      - S3_HOSTNAMEc=localstack
- #      - S3_ENDPOINT=http://localstack:4566
     volumes:
     # https://docs.localstack.cloud/references/init-hooks/
       - ./terraform:/usr/infrastructure
- #    links:
- #      - localstack:s3.localhost.localstack.cloud
- #    extra_hosts:
- #      - s3.localhost.localstack.cloud:127.0.0.1
+
     working_dir: /usr/infrastructure
     entrypoint:
       - '/usr/bin/env'
