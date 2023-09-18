@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      - DEBUG=${DEBUG-1}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_DEFAULT_REGION=eu-west-1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - localstack-data:/var/lib/localstack
+    networks:
+      - ls
+
+  lambda-setup:
+    container_name: lambda-setup
+    build:
+      context: .
+      dockerfile: Dockerfile.tflocal
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_SESSION_TOKEN=test
+      - AWS_DEFAULT_REGION=eu-west-1
+      - ENV=dev
+      - LOCALSTACK_HOSTNAME=localstack
+ #      - S3_HOSTNAMEc=localstack
+ #      - S3_ENDPOINT=http://localstack:4566
+    volumes:
+    # https://docs.localstack.cloud/references/init-hooks/
+      - ./terraform:/usr/infrastructure
+ #    links:
+ #      - localstack:s3.localhost.localstack.cloud
+ #    extra_hosts:
+ #      - s3.localhost.localstack.cloud:127.0.0.1
+    working_dir: /usr/infrastructure
+    entrypoint:
+      - '/usr/bin/env'
+      - 'path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+    networks:
+      - ls
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "--- Provisioning resources in Localstack environment ---"
+        echo "Configuring Terraform infrastructure directory."
+        
+        # First, setup the infrastructure directory, with the required overrides
+        
+        # rm -rf /usr/infrastructure/.terraform || true
+        # cd /usr/infrastructure || return
+        
+        terraform init #-upgrade
+        terraform workspace select -or-create localstack
+        terraform apply -auto-approve -lock=false
+ 
+        echo "--- Provisioning complete ---"
+        
+        
+        # echo "Copying file into bucket"
+        # aws --endpoint-url http://localhost:4566 \
+        # s3 cp some-log-file.log s3://your-bucket-name/
+ 
+        # sleep 1
+ 
+        # echo "SQS notification record:"
+        # aws --endpoint-url http://localhost:4566 \
+            # sqs receive-message \
+            # --queue-url http://localhost:4566/000000000000/s3-event-notification-queue \
+        # | jq -r '.Messages[0].Body' | jq .
+
+
+volumes:
+  localstack-data:
+    name: localstack-data
+networks:
+  ls:
+    name: localstack
