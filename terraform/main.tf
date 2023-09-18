@@ -8,7 +8,7 @@ provider "aws" {
 #   s3_use_path_style = true
     
     endpoints {
-        s3  = "s3.eu-west-1.localhost.localstack.cloud"
+        s3  = "s3.localhost.localstack.cloud"
         sns = "http://localstack:4566"
         sqs = "http://localstack:4566"
   }
