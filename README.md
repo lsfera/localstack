@@ -5,23 +5,6 @@ this repo contains a docker-compose file which brings up a localstack container 
 # Bring up local stack
 
 ```
-docker-compose -d
+docker-compose up
 ```
 
-# Download Terraform AWS provider
-
-```
-terraform init
-```
-
-# See the deployment plan and accept it by typing yes
-
-``` 
-terraform plan
-```
-
-# Apply the plan and deploy the infrastructure
-
-```
-terraform apply
-```
